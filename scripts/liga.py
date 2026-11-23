@@ -32,7 +32,7 @@ MADRID = ZoneInfo("Europe/Madrid")
 H4C_DIR = Path("/workspace/h4c")
 HERE = Path(__file__).resolve().parent
 DEFAULT_OUT = HERE / "site"
-DEFAULT_TITLE = "Liga Brooklyn Ourense"
+DEFAULT_TITLE = "Auren League"
 PUBLIC_KEY_SALT = "liga-ourense-v1"
 TZ_NAME = "Europe/Madrid"
 IMG_BASE = "https://www.brooklynfitzone.com/resources/images/"
@@ -48,8 +48,8 @@ STREAK_PAIR_PTS = 10
 STREAK_MONTH_PTS = 14
 RUTINA_PTS = {2: 5, 3: 6, 4: 7, 5: 8, 6: 9, 7: 10}
 DOBLETE_PTS = 2
-ILBF_BOOKING_PTS = 16
-ILBF_CONVERSION_PTS = 30
+ILBF_BOOKING_PTS = 10
+ILBF_CONVERSION_PTS = 20
 
 MONTHS_ES = "ene feb mar abr may jun jul ago sep oct nov dic".split()
 ORDS = {1: "1.º", 2: "2.º", 3: "3.er", 4: "4.º", 5: "5.º", 6: "6.º", 7: "7.º"}
@@ -479,7 +479,9 @@ def score_social(fitboxer_id: str, referrals: list[Referral], start: date, end: 
         if ref.referrer_id != fitboxer_id:
             continue
         who = ref.referred_name or "un invitado"
-        if ref.booking_date and start <= ref.booking_date <= end:
+        converted = ref.conversion_date is not None
+        # Si el invitado acaba convirtiendo, solo cuentan los puntos de conversión.
+        if ref.booking_date and start <= ref.booking_date <= end and not converted:
             ev_b.append(PointEvent(
                 date=ref.booking_date,
                 points=ILBF_BOOKING_PTS,
@@ -634,14 +636,16 @@ def run_self_tests() -> None:
     refs = [
         Referral("fb-test", "g1", "Luis M.", date(2026, 9, 10), date(2026, 10, 1)),
         Referral("fb-test", "g2", "Eva R.", date(2026, 8, 1), None),  # booking before start
+        Referral("fb-test", "g4", "Marta S.", date(2026, 9, 12), None),  # booking only, in period
+        Referral("fb-test", "g5", "Paz L.", date(2026, 9, 11), date(2026, 12, 1)),  # converts after end: no booking
         Referral("other", "g3", "No", date(2026, 9, 10), None),
     ]
     s = run(_att(fid, date(2026, 9, 3)), refs=refs, pending=False)
     rb = next(x for x in s.breakdown if x.key == "invitacion_reserva")
     rc = next(x for x in s.breakdown if x.key == "invitacion_conversion")
-    assert rb.points == 16 and rb.count == 1 and "Luis M." in rb.events[0].reason
-    assert rc.points == 30 and rc.count == 1
-    assert s.points == 16 + 30  # only one training day (0 rutina) + social
+    assert rb.points == 10 and rb.count == 1 and "Marta S." in rb.events[0].reason
+    assert rc.points == 20 and rc.count == 1 and "Luis M." in rc.events[0].reason
+    assert s.points == 10 + 20  # one training day (0 rutina) + booking (no convert) + conversion
 
     # Name disambiguation
     p1 = score_fitboxer("x1", "Jennifer B.", _att("x1", date(2026, 9, 3)), start, end, social_pending=True)
