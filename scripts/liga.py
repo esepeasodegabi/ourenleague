@@ -61,9 +61,16 @@ log = logging.getLogger("liga")
 # Display / privacy
 # ---------------------------------------------------------------------------
 
+def clean_given_name(first: str) -> str:
+    """Drop punctuation in the given name so the public form stays 'Nombre I.'"""
+    parts = [part.replace(".", "").replace(",", "") for part in (first or "").split()]
+    return " ".join(part for part in parts if part)
+
+
 def public_name(first_name: Optional[str], last_name: Optional[str], name: Optional[str]) -> str:
     """Nombre de pila + inicial del primer apellido."""
     first, last = _split_name(first_name, last_name, name)
+    first = clean_given_name(first)
     if not first:
         first = "Fitboxer"
     source = last or first
@@ -74,12 +81,12 @@ def public_name(first_name: Optional[str], last_name: Optional[str], name: Optio
 def _split_name(first_name: Optional[str], last_name: Optional[str], name: Optional[str]) -> tuple[str, str]:
     first = (first_name or "").strip()
     last = (last_name or "").strip()
-    if not first and name:
+    if name:
         parts = [p for p in name.strip().split() if p]
-        if parts:
+        if not first and parts:
             first = parts[0]
-            if not last and len(parts) > 1:
-                last = parts[-1]
+        if not last and len(parts) > 1:
+            last = parts[-1]
     return first, last
 
 
@@ -111,6 +118,7 @@ def disambiguate_names(
         for s in people:
             first, last, full = raw_names.get(s.fitboxer_id, (None, None, None))
             first, last = _split_name(first, last, full)
+            first = clean_given_name(first)
             if not first:
                 first = s.display_name.split()[0] if s.display_name else "Fitboxer"
             infos.append((s, first, _surname_letters(last)))
@@ -655,6 +663,10 @@ def run_self_tests() -> None:
         "x2": ("Jennifer", "Barrios", None),
     })
     assert {p1.display_name, p2.display_name} == {"Jennifer Br.", "Jennifer Ba."}
+
+    # Given names sometimes already include a middle initial with a period.
+    assert public_name("Jeimy K.", "Costa", None) == "Jeimy K C."
+    assert public_name("Jeimy K.", None, "Jeimy K. Costa") == "Jeimy K C."
 
     print("self-tests: ok")
 
