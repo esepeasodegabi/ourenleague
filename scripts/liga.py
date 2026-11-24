@@ -48,7 +48,7 @@ STREAK_PAIR_PTS = 10
 STREAK_MONTH_PTS = 14
 RUTINA_PTS = {2: 5, 3: 6, 4: 7, 5: 8, 6: 9, 7: 10}
 DOBLETE_PTS = 2
-ILBF_BOOKING_PTS = 10
+ILBF_BOOKING_PTS = 5
 ILBF_CONVERSION_PTS = 25
 
 MONTHS_ES = "ene feb mar abr may jun jul ago sep oct nov dic".split()
@@ -643,9 +643,9 @@ def run_self_tests() -> None:
     s = run(_att(fid, date(2026, 9, 3)), refs=refs, pending=False)
     rb = next(x for x in s.breakdown if x.key == "invitacion_reserva")
     rc = next(x for x in s.breakdown if x.key == "invitacion_conversion")
-    assert rb.points == 10 and rb.count == 1 and "Marta S." in rb.events[0].reason
+    assert rb.points == 5 and rb.count == 1 and "Marta S." in rb.events[0].reason
     assert rc.points == 25 and rc.count == 1 and "Luis M." in rc.events[0].reason
-    assert s.points == 10 + 25  # one training day (0 rutina) + booking (no convert) + conversion
+    assert s.points == 5 + 25  # one training day (0 rutina) + booking (no convert) + conversion
 
     # Name disambiguation
     p1 = score_fitboxer("x1", "Jennifer B.", _att("x1", date(2026, 9, 3)), start, end, social_pending=True)
