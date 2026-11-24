@@ -250,8 +250,8 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
         default=None,
         help="Override current time (ISO datetime). Default: now in Europe/Madrid",
     )
-    p.add_argument("--from-date", dest="from_date", default=None, help="Recent extract start (default: day-2)")
-    p.add_argument("--to-date", dest="to_date", default=None, help="Recent extract end (default: day+1)")
+    p.add_argument("--from-date", dest="from_date", default=None, help="Force recent extract start (default: since last successful run)")
+    p.add_argument("--to-date", dest="to_date", default=None, help="Force recent extract end (default: today+1)")
     return p.parse_args(argv)
 
 
@@ -311,24 +311,18 @@ def main(argv: Optional[list[str]] = None) -> int:
             emit("NOTHING_DUE")
             return 0
 
-        extract_from = args.from_date or (day - timedelta(days=2)).isoformat()
-        extract_to = args.to_date or (day + timedelta(days=1)).isoformat()
+        # By default extract.py --recent picks its own window from the last
+        # successful run (watermark) and refreshes only fichas with new
+        # activity. --from-date/--to-date force a fixed window (manual repair).
         start = league_start()
         python = str(PYTHON if PYTHON.is_file() else sys.executable)
+        extract_cmd = [python, str(SCRIPT_DIR / "extract.py"), "--recent"]
+        if args.from_date:
+            extract_cmd += ["--from-date", args.from_date]
+        if args.to_date:
+            extract_cmd += ["--to-date", args.to_date]
 
-        run_cmd(
-            [
-                python,
-                str(SCRIPT_DIR / "extract.py"),
-                "--recent",
-                "--from-date",
-                extract_from,
-                "--to-date",
-                extract_to,
-            ],
-            cwd=SCRIPT_DIR,
-            timeout=60 * 40,
-        )
+        run_cmd(extract_cmd, cwd=SCRIPT_DIR, timeout=60 * 40)
         run_cmd(
             [str(LIGA_DIR / "publish.sh"), "--start", start],
             cwd=LIGA_DIR,

@@ -49,6 +49,11 @@ RECENT_LOCK = SCRIPT_DIR / "state" / "extract_recent.lock"
 INCREMENTAL_STAGE = SCRIPT_DIR / "staging" / "h4c_stage_incremental.sqlite"
 PG_OVERRIDE_FILE = SCRIPT_DIR / "state" / "pg.env"
 STATUS_TYPES = ("1", "fb", "clt", "5", "cm", "out")
+# --recent watermark: start of the last successful run minus this overlap.
+RECENT_OVERLAP_HOURS = 3.0
+RECENT_MAX_LOOKBACK_DAYS = 45
+RECENT_STALE_REFRESH = 10
+DETAIL_FLUSH_EVERY = 25
 # Portal fitboxer/ficha ids are 24-char hex Mongo ObjectIds. Some bookings
 # instead carry a Salesforce-style id (e.g. 18-char 00Q… lead), which the
 # ficha query rejects: "not a valid MongoObjectId". Those are skippable.
@@ -1043,6 +1048,14 @@ def connect_postgres() -> psycopg.Connection:
 
 
 
+def _dedupe(rows: list[dict[str, Any]], pk: list[str]) -> list[dict[str, Any]]:
+    """Keep the last row per primary key (ON CONFLICT cannot hit a key twice in one INSERT)."""
+    out: dict[tuple, dict[str, Any]] = {}
+    for row in rows:
+        out[tuple(row.get(k) for k in pk)] = row
+    return list(out.values())
+
+
 def upsert(
     cur: psycopg.Cursor,
     table: str,
@@ -1144,6 +1157,33 @@ class Extractor:
         self.slots: list[dict[str, Any]] = []
         self.fitboxer_ids_seen: set[str] = set()
         self.detailed_fitboxers: set[str] = set()
+        # --recent: fitboxers with activity at/after activity_cutoff (None = all).
+        self.activity_cutoff: Optional[datetime] = None
+        self.active_fitboxers: set[str] = set()
+        self.track_membership_changes = False
+
+    def mark_active(self, fid: Optional[str], *stamps: Optional[datetime]) -> None:
+        """Record activity for the incremental detail refresh.
+
+        Active when any past timestamp falls at/after activity_cutoff. Future
+        timestamps (scheduled unsubs, effective dates) are ignored until they
+        pass. No timestamp at all counts as activity (conservative)."""
+        if not fid:
+            return
+        cutoff = self.activity_cutoff
+        known = []
+        for ts in stamps:
+            if ts is None:
+                continue
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=MADRID)
+            known.append(ts)
+        if cutoff is None or not known:
+            self.active_fitboxers.add(fid)
+            return
+        now = datetime.now(UTC)
+        if any(cutoff <= ts <= now for ts in known):
+            self.active_fitboxers.add(fid)
 
     def close_pg(self) -> None:
         """Drop any open Postgres session. Never hold a DB socket during portal I/O."""
@@ -1331,7 +1371,6 @@ class Extractor:
             raise RuntimeError("club query returned no data")
         cid = as_text(club.get("id")) or self.club_id
         self.club_id = cid
-        cur = self.db_cursor()
         n = self.write_rows(
             "h4c.clubs",
             [
@@ -1523,7 +1562,6 @@ class Extractor:
             rows.append(rec)
             self.slots.append(rec)
             self.known_slot_ids.add(sid)
-        cur = self.db_cursor()
         self.add_count("schedule_slots", self.write_rows("h4c.schedule_slots", rows, ["id"]))
         self.commit()
         log.info("Loaded schedule slots=%s", len(rows))
@@ -1595,17 +1633,28 @@ class Extractor:
                 what=f"classes_finished {start}..{end}",
             ) or {}
             rows = []
+            finished_ids: set[str] = set()
             for item in data.get("classes") or []:
                 if not isinstance(item, dict) or not item.get("id"):
                     continue
                 rows.append(self._class_row(item, is_finished=True))
                 ids.add(str(item["id"]))
+                finished_ids.add(str(item["id"]))
             if rows:
                 self.add_count("classes", self.write_rows("h4c.classes", rows, ["id"]))
                 self.commit()
             log.info("Finished classes %s..%s: %s", start, end, len(rows))
             if details:
-                self._load_finished_details(sorted(ids))
+                detail_ids = sorted(finished_ids)
+                if self.activity_cutoff is not None and detail_ids:
+                    detail_ids = self._finished_classes_needing_detail(rows, self.activity_cutoff)
+                    log.info(
+                        "Finished class details to fetch: %s of %s (cutoff %s)",
+                        len(detail_ids),
+                        len(finished_ids),
+                        self.activity_cutoff.astimezone(MADRID).isoformat(timespec="minutes"),
+                    )
+                self._load_finished_details(detail_ids)
         if upcoming:
             data = self.staged_gql(
                 "classes_upcoming",
@@ -1629,6 +1678,41 @@ class Extractor:
             if details:
                 self._load_upcoming_details(upcoming_ids)
         return ids
+
+    def _finished_classes_needing_detail(self, rows: list[dict[str, Any]], cutoff: datetime) -> list[str]:
+        """Classes that started at/after the cutoff, plus older ones whose
+        attendance was never stored (so a missed run still gets filled)."""
+        need: set[str] = set()
+        older: list[str] = []
+        for row in rows:
+            cid = row.get("id")
+            if not cid:
+                continue
+            st = row.get("starts_at")
+            if st is None or st >= cutoff:
+                need.add(cid)
+            else:
+                older.append(cid)
+        if older:
+            try:
+                cur = self.db_cursor()
+                cur.execute(
+                    """
+                    SELECT c.id FROM h4c.classes c
+                     WHERE c.id = ANY(%s)
+                       AND EXISTS (SELECT 1 FROM h4c.class_participants p
+                                    WHERE p.class_id = c.id AND p.attendance IN ('attended', 'no_show'))
+                    """,
+                    (older,),
+                )
+                loaded = {str(r[0]) for r in cur.fetchall()}
+                self.commit()
+            except Exception as exc:
+                self.close_pg()
+                log.warning("Could not check stored class attendance (fetching all): %s", exc)
+                loaded = set()
+            need.update(cid for cid in older if cid not in loaded)
+        return sorted(need)
 
     def _load_finished_details(self, class_ids: list[str]) -> None:
         # Phase 1: fetch every class into SQLite staging (no DB socket held).
@@ -1659,6 +1743,7 @@ class Extractor:
                 if not fid:
                     continue
                 self.fitboxer_ids_seen.add(fid)
+                self.mark_active(fid, parse_dt(detail.get("tim")))
                 wid = as_text(wo.get("id"))
                 participants.append(
                     {
@@ -1713,6 +1798,7 @@ class Extractor:
                 if not fid:
                     continue
                 self.fitboxer_ids_seen.add(fid)
+                self.mark_active(fid, parse_dt(detail.get("tim")))
                 participants.append(
                     {
                         "class_id": cid,
@@ -1848,7 +1934,6 @@ class Extractor:
                 }
             )
         if rows:
-            cur = self.db_cursor()
             self.add_count("workouts", self.write_rows("h4c.workouts", rows, ["id"], mode="fill"))
             self.commit()
         log.info("Sessions %s..%s: %s", start, end, len(rows))
@@ -1870,6 +1955,7 @@ class Extractor:
             fid = as_text(od.get("fitboxerId"))
             if fid:
                 self.fitboxer_ids_seen.add(fid)
+                self.mark_active(fid, parse_dt(od.get("date")), parse_dt(od.get("statusTime")))
             rows.append(
                 {
                     "id": as_text(od.get("id")),
@@ -1892,7 +1978,6 @@ class Extractor:
                 }
             )
         if rows:
-            cur = self.db_cursor()
             self.add_count("orders", self.write_rows("h4c.orders", rows, ["id"]))
             self.commit()
         log.info("Orders %s..%s: %s", start, end, len(rows))
@@ -1906,13 +1991,13 @@ class Extractor:
             what=f"unsubs {start}..{end}",
         ) or {}
         rows = []
-        cur = self.db_cursor()
         for un in data.get("unsubs") or []:
             if not isinstance(un, dict) or not un.get("id"):
                 continue
             fid = as_text(un.get("fitboxerId"))
             if fid:
                 self.fitboxer_ids_seen.add(fid)
+                self.mark_active(fid, parse_dt(un.get("offRequestTime")), parse_dt(un.get("offTime")))
             plan_id = self._ensure_plan(as_text(un.get("planId")), as_text(un.get("name")))
             rows.append(
                 {
@@ -1958,6 +2043,7 @@ class Extractor:
                     fid = as_text(fb.get("fitboxerId")) or as_text(fb.get("id"))
                 if fid:
                     self.fitboxer_ids_seen.add(fid)
+                    self.mark_active(fid, parse_dt(ev.get("time")), parse_dt(ev.get("when")))
                 payment = ev.get("payment") if isinstance(ev.get("payment"), dict) else {}
                 order = ev.get("order") if isinstance(ev.get("order"), dict) else {}
                 sub = ev.get("subscription") if isinstance(ev.get("subscription"), dict) else {}
@@ -1995,9 +2081,24 @@ class Extractor:
 
     def load_memberships(self) -> None:
         data = self.staged_gql("memberships", "memberships", Q_MEMBERSHIPS, what="memberships") or {}
-        cur = self.db_cursor()
+        # --recent: the portal has no "changed since" filter for memberships, so
+        # the (single, ~200-row) list is fetched and compared with the stored
+        # raw payloads; only new/changed memberships are written and their
+        # fitboxers get a detail refresh.
+        known_raw: Optional[dict[str, Any]] = None
+        if self.track_membership_changes:
+            try:
+                cur = self.db_cursor()
+                cur.execute("SELECT id, raw FROM h4c.memberships WHERE club_id = %s", (self.club_id,))
+                known_raw = {str(r[0]): r[1] for r in cur.fetchall()}
+                self.commit()
+            except Exception as exc:
+                self.close_pg()
+                log.warning("Could not read stored memberships (writing all): %s", exc)
+                known_raw = None
         rows = []
         charge_rows = []
+        unchanged = 0
         for mb in data.get("memberships") or []:
             if not isinstance(mb, dict) or not mb.get("id"):
                 continue
@@ -2005,6 +2106,12 @@ class Extractor:
             fid = as_text(mb.get("fitboxerId"))
             if fid:
                 self.fitboxer_ids_seen.add(fid)
+            if known_raw is not None:
+                old = known_raw.get(str(mid))
+                if old is not None and json.loads(json.dumps(mb, default=str)) == old:
+                    unchanged += 1
+                    continue
+                self.mark_active(fid)
             plan_id = self._ensure_plan(as_text(mb.get("planId")), as_text(mb.get("name")))
             rows.append(
                 {
@@ -2054,7 +2161,7 @@ class Extractor:
                 self.write_rows("h4c.membership_charges", charge_rows, ["membership_id", "charge_date"]),
             )
         self.commit()
-        log.info("Memberships=%s charges=%s", len(rows), len(charge_rows))
+        log.info("Memberships written=%s unchanged=%s charges=%s", len(rows), unchanged, len(charge_rows))
 
     def load_leads(self) -> None:
         data = self.staged_gql("leads", "leads", Q_LEADS, what="leads") or {}
@@ -2338,17 +2445,56 @@ class Extractor:
         log.info("Fitboxers list complete unique=%s pages=%s", len(set(ids)), page)
         return ids
 
-    def _detail_profile_candidates(self, fitboxer_id: str) -> list[str]:
+    def _detail_profile_candidates(self, fitboxer_id: str, profile_map: Optional[dict[str, str]] = None) -> list[str]:
         cands = [fitboxer_id]
-        cur = self.db_cursor()
-        cur.execute("SELECT profile_id FROM h4c.fitboxers WHERE fitboxer_id=%s", (fitboxer_id,))
-        row = cur.fetchone()
-        if row and row[0] and str(row[0]) not in cands:
-            cands.insert(0, str(row[0]))
+        if profile_map is not None:
+            prof = profile_map.get(fitboxer_id)
+        else:
+            cur = self.db_cursor()
+            cur.execute("SELECT profile_id FROM h4c.fitboxers WHERE fitboxer_id=%s", (fitboxer_id,))
+            row = cur.fetchone()
+            prof = str(row[0]) if row and row[0] else None
+        if prof and prof not in cands:
+            cands.insert(0, prof)
         return cands
 
+    def _profile_map(self, fitboxer_ids: list[str]) -> dict[str, str]:
+        """fitboxer_id -> profile_id for many ids in one query."""
+        out: dict[str, str] = {}
+        for i in range(0, len(fitboxer_ids), 1000):
+            chunk = fitboxer_ids[i : i + 1000]
+            for attempt in range(4):
+                try:
+                    cur = self.db_cursor()
+                    cur.execute(
+                        "SELECT fitboxer_id, profile_id FROM h4c.fitboxers WHERE fitboxer_id = ANY(%s)",
+                        (chunk,),
+                    )
+                    for fid, prof in cur.fetchall():
+                        if fid and prof:
+                            out[str(fid)] = str(prof)
+                    self.commit()
+                    break
+                except (psycopg.OperationalError, psycopg.InterfaceError, OSError) as exc:
+                    self.close_pg()
+                    if attempt == 3:
+                        raise
+                    log.warning("Profile map attempt %s/4 failed: %s", attempt + 1, exc)
+                    time.sleep(min(1.2 * (attempt + 1), 4))
+        return out
+
     def load_fitboxer_details(self, fitboxer_ids: Iterable[str]) -> None:
+        """Fetch fichas from the portal and write them in batches.
+
+        Portal calls never hold a DB socket; each batch of DETAIL_FLUSH_EVERY
+        fichas is written on one short-lived connection (one handshake instead
+        of two per fitboxer). A failing batch is retried row by row so one bad
+        ficha cannot block the rest."""
         todo = [fid for fid in dict.fromkeys(fitboxer_ids) if fid and fid not in self.detailed_fitboxers]
+        if not todo:
+            return
+        profile_map = self._profile_map([f for f in todo if is_mongo_object_id(f)])
+        pending: list[tuple[str, dict]] = []
         for i, fid in enumerate(todo, start=1):
             if not is_mongo_object_id(fid):
                 # Salesforce-style / other non-Mongo ids cannot be fetched as a
@@ -2361,7 +2507,7 @@ class Extractor:
                 continue
             detail = None
             last_err = None
-            for cand in self._detail_profile_candidates(fid):
+            for cand in self._detail_profile_candidates(fid, profile_map):
                 if not is_mongo_object_id(cand):
                     continue
                 try:
@@ -2378,17 +2524,53 @@ class Extractor:
                     continue
                 self.note_error(f"fitboxer detail {fid}: {last_err or 'empty'}")
                 continue
-            try:
-                self._store_fitboxer_detail(detail, fallback_id=fid)
-                self.detailed_fitboxers.add(fid)
-                real_id = as_text(detail.get("fitboxerId")) or fid
-                self.detailed_fitboxers.add(real_id)
-            except Exception as exc:
-                safe_rollback(self.conn)
-                self.ensure_conn()
-                self.note_error(f"store fitboxer {fid}: {exc}")
+            pending.append((fid, detail))
+            if len(pending) >= DETAIL_FLUSH_EVERY:
+                self._flush_fitboxer_details(pending)
+                pending = []
             if i % 50 == 0 or i == len(todo):
                 log.info("Fitboxer details %s/%s", i, len(todo))
+        if pending:
+            self._flush_fitboxer_details(pending)
+
+    def _flush_fitboxer_details(self, pending: list[tuple[str, dict]]) -> None:
+        clubs: list[dict[str, Any]] = []
+        fbs: list[dict[str, Any]] = []
+        packs: list[dict[str, Any]] = []
+        rewards: list[dict[str, Any]] = []
+        new_clubs: set[str] = set()
+        for fid, detail in pending:
+            club_id, row, pk_rows, rw_rows = self._fitboxer_detail_rows(detail, fid)
+            if club_id and club_id not in self.known_club_ids and club_id not in new_clubs:
+                new_clubs.add(club_id)
+                clubs.append({"id": club_id, "raw": raw_of({}), "extracted_at": datetime.now(UTC)})
+            fbs.append(row)
+            packs.extend(pk_rows)
+            rewards.extend(rw_rows)
+        try:
+            self.write_group(
+                [
+                    (None, "h4c.clubs", clubs, ["id"], "fill"),
+                    ("fitboxers", "h4c.fitboxers", _dedupe(fbs, ["fitboxer_id"]), ["fitboxer_id"]),
+                    ("session_packs", "h4c.session_packs", _dedupe(packs, ["id"]), ["id"]),
+                    ("rewards", "h4c.rewards", _dedupe(rewards, ["id"]), ["id"]),
+                ]
+            )
+            self.known_club_ids.update(new_clubs)
+            for fid, detail in pending:
+                self.detailed_fitboxers.add(fid)
+                self.detailed_fitboxers.add(as_text(detail.get("fitboxerId")) or fid)
+        except Exception as exc:
+            self.close_pg()
+            log.warning("Batch write of %s fitboxer details failed (%s); retrying one by one", len(pending), exc)
+            for fid, detail in pending:
+                try:
+                    self._store_fitboxer_detail(detail, fallback_id=fid)
+                    self.detailed_fitboxers.add(fid)
+                    self.detailed_fitboxers.add(as_text(detail.get("fitboxerId")) or fid)
+                except Exception as exc2:
+                    self.close_pg()
+                    self.note_error(f"store fitboxer {fid}: {exc2}")
 
     def ensure_club_stub(self, club_id: Optional[str]) -> None:
         """Insert a placeholder club so visiting fitboxers don't fail the FK."""
@@ -2403,10 +2585,20 @@ class Extractor:
         self.known_club_ids.add(club_id)
 
     def _store_fitboxer_detail(self, fb: dict, fallback_id: str) -> None:
+        club_id, row, packs, reward_rows = self._fitboxer_detail_rows(fb, fallback_id)
+        self.ensure_club_stub(club_id)
+        self.write_group(
+            [
+                ("fitboxers", "h4c.fitboxers", [row], ["fitboxer_id"]),
+                ("session_packs", "h4c.session_packs", packs, ["id"]),
+                ("rewards", "h4c.rewards", reward_rows, ["id"]),
+            ]
+        )
+
+    def _fitboxer_detail_rows(self, fb: dict, fallback_id: str) -> tuple[Optional[str], dict, list[dict], list[dict]]:
         fid = as_text(fb.get("fitboxerId")) or fallback_id
         club = fb.get("club") if isinstance(fb.get("club"), dict) else {}
         club_id = as_text(club.get("id")) or self.club_id
-        self.ensure_club_stub(club_id)
         row = {
             "fitboxer_id": fid,
             "profile_id": as_text(fb.get("id")) or fid,
@@ -2499,13 +2691,7 @@ class Extractor:
                         "extracted_at": datetime.now(UTC),
                     }
                 )
-        self.write_group(
-            [
-                ("fitboxers", "h4c.fitboxers", [row], ["fitboxer_id"]),
-                ("session_packs", "h4c.session_packs", packs, ["id"]),
-                ("rewards", "h4c.rewards", reward_rows, ["id"]),
-            ]
-        )
+        return club_id, row, packs, reward_rows
 
     # -- modes -------------------------------------------------------------
 
@@ -2587,17 +2773,41 @@ class Extractor:
         self.load_fitboxer_details(list(self.fitboxer_ids_seen))
         self.close_pg()
 
-    def recent(self, start: date, end: date) -> None:
-        """Load a bounded class/session window. Safe alongside a running backfill:
+    def recent(
+        self,
+        start: date,
+        end: date,
+        *,
+        activity_cutoff: Optional[datetime] = None,
+        all_details: bool = False,
+        stale_refresh: int = RECENT_STALE_REFRESH,
+    ) -> None:
+        """Incremental refresh since the last successful run. Safe alongside a
+        running backfill: separate staging SQLite file and idempotent upserts.
 
-        uses a separate staging SQLite file and only upserts the given window
-        (club, schedule, classes, participants, workouts, sessions, and
-        fitboxer details for people seen in that window).
+        Classes/sessions/orders/unsubs/status are fetched for start..today
+        (start comes from the watermark in main()); upcoming classes up to
+        `end`. Fichas (charges, rewards, session packs) are refreshed only for
+        fitboxers with activity at/after `activity_cutoff`, new/changed
+        memberships, people not yet in h4c.fitboxers, plus a few of the
+        stalest member fichas. `all_details` restores the old behaviour
+        (every fitboxer seen, including every membership holder).
         """
         today = datetime.now(MADRID).date()
         self.refresh = True
         session_end = min(end, today)
-        log.info("Recent today=%s classes=%s..%s sessions/shop=%s..%s", today, start, end, start, session_end)
+        if not all_details:
+            self.activity_cutoff = activity_cutoff or datetime(start.year, start.month, start.day, tzinfo=MADRID)
+            self.track_membership_changes = True
+        log.info(
+            "Recent today=%s classes=%s..%s sessions/shop=%s..%s activity_cutoff=%s",
+            today,
+            start,
+            end,
+            start,
+            session_end,
+            self.activity_cutoff.astimezone(MADRID).isoformat(timespec="minutes") if self.activity_cutoff else "all",
+        )
         self.load_club()
         self.load_schedule()
         self.load_memberships()
@@ -2606,11 +2816,69 @@ class Extractor:
         self.load_orders(start, session_end)
         self.load_unsubs(start, session_end)
         self.load_status(start, session_end)
-        ids = list(self.fitboxer_ids_seen)
-        log.info("Loading %s fitboxer details (recent)", len(ids))
+        if all_details:
+            ids = list(self.fitboxer_ids_seen)
+            log.info("Loading %s fitboxer details (recent, all seen)", len(ids))
+        else:
+            ids = set(self.active_fitboxers)
+            n_active = len(ids)
+            unknown = self._unknown_fitboxers(self.fitboxer_ids_seen - ids)
+            ids |= unknown
+            stale = self._stale_member_fitboxers(stale_refresh, exclude=ids) if stale_refresh > 0 else []
+            ids |= set(stale)
+            ids = sorted(ids)
+            log.info(
+                "Loading %s fitboxer details (recent: active=%s new=%s stale=%s; seen=%s)",
+                len(ids),
+                n_active,
+                len(unknown),
+                len(stale),
+                len(self.fitboxer_ids_seen),
+            )
         if ids:
             self.load_fitboxer_details(ids)
         self.close_pg()
+
+    def _unknown_fitboxers(self, candidates: set[str]) -> set[str]:
+        cands = sorted(c for c in candidates if c)
+        if not cands:
+            return set()
+        try:
+            cur = self.db_cursor()
+            cur.execute("SELECT fitboxer_id FROM h4c.fitboxers WHERE fitboxer_id = ANY(%s)", (cands,))
+            known = {str(r[0]) for r in cur.fetchall()}
+            self.commit()
+        except Exception as exc:
+            self.close_pg()
+            log.warning("Could not check known fitboxers: %s", exc)
+            return set()
+        return {c for c in cands if c not in known}
+
+    def _stale_member_fitboxers(self, limit: int, exclude: set[str]) -> list[str]:
+        """A few current members whose ficha is oldest (>24h), as a safety net."""
+        try:
+            cur = self.db_cursor()
+            cur.execute(
+                """
+                SELECT f.fitboxer_id
+                  FROM h4c.fitboxers f
+                  JOIN (SELECT DISTINCT fitboxer_id FROM h4c.memberships
+                         WHERE club_id = %s AND coalesce(is_off, false) = false) m
+                    ON m.fitboxer_id = f.fitboxer_id
+                 WHERE f.extracted_at < now() - interval '24 hours'
+                   AND NOT (f.fitboxer_id = ANY(%s))
+                 ORDER BY f.extracted_at ASC
+                 LIMIT %s
+                """,
+                (self.club_id, sorted(exclude), limit),
+            )
+            out = [str(r[0]) for r in cur.fetchall()]
+            self.commit()
+            return out
+        except Exception as exc:
+            self.close_pg()
+            log.warning("Could not pick stale fichas: %s", exc)
+            return []
 
 
 def resolve_club_id(client: H4CClient) -> str:
@@ -2624,6 +2892,25 @@ def resolve_club_id(client: H4CClient) -> str:
         return did
     # fallback known Ourense club
     return "6656d71b24aa9a0008d08e49"
+
+
+def last_success_watermark(conn: psycopg.Connection) -> Optional[datetime]:
+    """Start time of the last successful recent/incremental run (UTC aware)."""
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT max(started_at) FROM h4c.extraction_runs
+         WHERE status = 'success' AND trigger IN ('recent', 'incremental')
+        """
+    )
+    row = cur.fetchone()
+    conn.rollback()
+    if not row or row[0] is None:
+        return None
+    ts = row[0]
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=UTC)
+    return ts
 
 
 def start_run(conn: psycopg.Connection, mode: str, window_from: date, window_to: date, club_id: Optional[str]) -> int:
@@ -2673,7 +2960,27 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     mode.add_argument(
         "--recent",
         action="store_true",
-        help="Bounded recent window (own lock and staging file; safe alongside a backfill)",
+        help="Incremental refresh since the last successful run (own lock and staging file; safe alongside a backfill)",
+    )
+    p.add_argument(
+        "--overlap-hours",
+        dest="overlap_hours",
+        type=float,
+        default=RECENT_OVERLAP_HOURS,
+        help="--recent: safety overlap before the last successful run start (hours)",
+    )
+    p.add_argument(
+        "--all-details",
+        dest="all_details",
+        action="store_true",
+        help="--recent: refresh fichas of everyone seen (old behaviour, slow)",
+    )
+    p.add_argument(
+        "--stale-refresh",
+        dest="stale_refresh",
+        type=int,
+        default=RECENT_STALE_REFRESH,
+        help="--recent: also refresh this many of the oldest member fichas (>24h)",
     )
     p.add_argument("--pause", type=float, default=DEFAULT_PAUSE, help="Pause between portal requests (seconds)")
     p.add_argument("--email", default=os.environ.get("H4C_EMAIL", DEFAULT_EMAIL))
@@ -2705,6 +3012,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             end = today + timedelta(days=1)
     else:
         start = date.fromisoformat(args.from_date) if args.from_date else (today - timedelta(days=3))
+    watermark: Optional[datetime] = None
+    activity_cutoff: Optional[datetime] = None
 
     shop_start = date.fromisoformat(args.shop_from) if args.shop_from else BACKFILL_START
     shop_from_log = shop_start if mode == "backfill" else start
@@ -2722,7 +3031,11 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     try:
         probe = connect_postgres()
-        probe.close()
+        try:
+            if mode == "recent" and not args.from_date:
+                watermark = last_success_watermark(probe)
+        finally:
+            probe.close()
     except Exception as exc:
         log.error("Postgres connection failed: %s", exc)
         if recent_lock is not None:
@@ -2731,6 +3044,32 @@ def main(argv: Optional[list[str]] = None) -> int:
             except Exception:
                 pass
         return 2
+
+    if mode == "recent":
+        if args.from_date:
+            activity_cutoff = datetime(start.year, start.month, start.day, tzinfo=MADRID)
+            log.info("Recent window fixed by --from-date %s", start)
+        elif watermark is None:
+            activity_cutoff = datetime(start.year, start.month, start.day, tzinfo=MADRID)
+            log.info("No successful run recorded; falling back to window from %s", start)
+        else:
+            activity_cutoff = watermark - timedelta(hours=max(0.0, args.overlap_hours))
+            start = activity_cutoff.astimezone(MADRID).date()
+            floor = today - timedelta(days=RECENT_MAX_LOOKBACK_DAYS)
+            if start < floor:
+                log.warning("Last successful run is older than %s days; limiting window to %s (run --backfill --from-date for older gaps)", RECENT_MAX_LOOKBACK_DAYS, floor)
+                start = floor
+                activity_cutoff = datetime(floor.year, floor.month, floor.day, tzinfo=MADRID)
+            if start > today:
+                start = today
+            log.info(
+                "Watermark: last successful run started %s; overlap %.1fh -> activity since %s, window %s .. %s",
+                watermark.astimezone(MADRID).isoformat(timespec="seconds"),
+                args.overlap_hours,
+                activity_cutoff.astimezone(MADRID).isoformat(timespec="minutes"),
+                start,
+                end,
+            )
 
     try:
         client = H4CClient(email=args.email, lang="es")
@@ -2762,7 +3101,13 @@ def main(argv: Optional[list[str]] = None) -> int:
         if mode == "backfill":
             ext.backfill(start, end, shop_start=shop_start)
         elif mode == "recent":
-            ext.recent(start, end)
+            ext.recent(
+                start,
+                end,
+                activity_cutoff=activity_cutoff,
+                all_details=args.all_details,
+                stale_refresh=args.stale_refresh,
+            )
         else:
             ext.incremental(today=end)
         duration = time.time() - t0
@@ -2776,7 +3121,13 @@ def main(argv: Optional[list[str]] = None) -> int:
                 status,
                 ext.counts,
                 err_text,
-                {"duration_seconds": round(duration, 2), "error_count": len(ext.errors)},
+                {
+                    "duration_seconds": round(duration, 2),
+                    "error_count": len(ext.errors),
+                    "watermark": watermark.isoformat() if watermark else None,
+                    "activity_cutoff": activity_cutoff.isoformat() if activity_cutoff else None,
+                    "details_refreshed": len(ext.detailed_fitboxers),
+                },
             )
         finally:
             try:
