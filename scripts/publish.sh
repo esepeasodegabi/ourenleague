@@ -244,6 +244,40 @@ if ocupa.exists():
 print("Contenido a publicar: index.html, data.json, img/, ocupa/, .nojekyll (se conserva scripts/)")
 PY
 
+# Guardia: el email del portal no puede aparecer en nada de lo que se publica
+# (web ni scripts/). Se lee de H4C_EMAIL o de extract.py y nunca se imprime.
+"$PYTHON" - "$PUBLISH_DIR" <<'EMAILGUARD'
+import os, re, sys
+from pathlib import Path
+root = Path(sys.argv[1])
+needles = set()
+env = (os.environ.get("H4C_EMAIL") or "").strip()
+if env:
+    needles.add(env.lower())
+try:
+    src = Path("/workspace/h4c/extract.py").read_text(encoding="utf-8")
+    m = re.search(r'^DEFAULT_EMAIL\s*=\s*"([^"]+)"', src, re.M)
+    if m and "@" in m.group(1):
+        needles.add(m.group(1).strip().lower())
+except OSError:
+    pass
+needles.add("@" + "brooklynfitboxing" + ".com")  # partido para no autodetectarse
+hits = []
+for path in root.rglob("*"):
+    if ".git" in path.relative_to(root).parts or not path.is_file():
+        continue
+    try:
+        text = path.read_bytes().decode("utf-8", "ignore").lower()
+    except OSError:
+        continue
+    if any(n in text for n in needles):
+        hits.append(str(path.relative_to(root)))
+if hits:
+    print("El email del portal aparece en archivos a publicar: " + ", ".join(sorted(hits)) + ". Abortando.", file=sys.stderr)
+    sys.exit(1)
+print("Guardia de email OK")
+EMAILGUARD
+
 git -C "$PUBLISH_DIR" add -A
 if git -C "$PUBLISH_DIR" diff --cached --quiet; then
   echo "No hay cambios que publicar."
