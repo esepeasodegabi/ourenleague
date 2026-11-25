@@ -109,6 +109,15 @@ fi
 if [[ "$SKIP_BUILD" -eq 0 ]]; then
   echo "Generando la liga desde ${START}…"
   "$PYTHON" "${ROOT}/liga.py" --start "$START" --out "$SITE_SRC" --title "$TITLE"
+  # Ocupación de sacos (ocupa/). Si falla, no bloquea la liga: se mantiene la versión anterior.
+  echo "Generando la ocupación de sacos…"
+  if ! "$PYTHON" "${ROOT}/ocupa.py" --out "${SITE_SRC}/ocupa.new"; then
+    echo "Aviso: no pude regenerar ocupa/; se publica la versión anterior." >&2
+    rm -rf "${SITE_SRC}/ocupa.new"
+  else
+    rm -rf "${SITE_SRC}/ocupa"
+    mv "${SITE_SRC}/ocupa.new" "${SITE_SRC}/ocupa"
+  fi
 else
   echo "Omitiendo regeneración; se publica ${SITE_SRC}"
 fi
@@ -159,13 +168,19 @@ else
   git -C "$PUBLISH_DIR" checkout -B main
 fi
 
-# Vaciar el árbol de trabajo dejando .git y scripts/, y copiar la salida estática.
+# Vaciar el árbol de trabajo dejando .git, scripts/ y ocupa/, y copiar la salida estática.
 # scripts/ versiona el extractor y la liga; no debe borrarse al regenerar la web.
+# ocupa/ solo se sustituye si hay una versión nueva generada.
 if [[ -e "${PUBLISH_DIR}/scripts" && ! -d "${PUBLISH_DIR}/scripts" ]]; then
   echo "scripts existe pero no es un directorio. Abortando." >&2
   exit 1
 fi
-find "$PUBLISH_DIR" -mindepth 1 -maxdepth 1 ! -name .git ! -name scripts -exec rm -rf {} +
+find "$PUBLISH_DIR" -mindepth 1 -maxdepth 1 ! -name .git ! -name scripts ! -name ocupa -exec rm -rf {} +
+if [[ -f "${SITE_SRC}/ocupa/index.html" && -f "${SITE_SRC}/ocupa/data.json" ]]; then
+  rm -rf "${PUBLISH_DIR}/ocupa"
+  mkdir -p "${PUBLISH_DIR}/ocupa"
+  cp "${SITE_SRC}/ocupa/index.html" "${SITE_SRC}/ocupa/data.json" "${PUBLISH_DIR}/ocupa/"
+fi
 cp "${SITE_SRC}/index.html" "$PUBLISH_DIR/index.html"
 cp "${SITE_SRC}/data.json" "$PUBLISH_DIR/data.json"
 # Solo las fotos referenciadas en data.json (nada suelto de generaciones anteriores).
@@ -206,7 +221,7 @@ python3 - "$PUBLISH_DIR" <<'PY'
 import sys
 from pathlib import Path
 root = Path(sys.argv[1])
-allowed = {".git", "index.html", "data.json", "img", ".nojekyll", "scripts"}
+allowed = {".git", "index.html", "data.json", "img", ".nojekyll", "scripts", "ocupa"}
 extra = sorted(p.name for p in root.iterdir() if p.name not in allowed)
 if extra:
     print("El directorio de publicación tiene archivos de más: " + ", ".join(extra), file=sys.stderr)
@@ -220,7 +235,13 @@ cfg = (root / ".git" / "config").read_text(encoding="utf-8")
 if "github_pat" in cfg or "x-access-token:" in cfg or "@github.com" in cfg.replace("https://github.com", ""):
     print("El .git/config parece contener credenciales. Abortando.", file=sys.stderr)
     sys.exit(1)
-print("Contenido a publicar: index.html, data.json, img/, .nojekyll (se conserva scripts/)")
+ocupa = root / "ocupa"
+if ocupa.exists():
+    extra = sorted(p.name for p in ocupa.iterdir() if p.name not in {"index.html", "data.json"})
+    if extra:
+        print("ocupa/ tiene archivos de más: " + ", ".join(extra), file=sys.stderr)
+        sys.exit(1)
+print("Contenido a publicar: index.html, data.json, img/, ocupa/, .nojekyll (se conserva scripts/)")
 PY
 
 git -C "$PUBLISH_DIR" add -A

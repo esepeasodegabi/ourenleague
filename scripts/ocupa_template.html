@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ocupación de sacos · Auren League</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #070708; --bg-2: #101014; --card: #16161c; --card-2: #1d1d26;
+      --red: #ff2a2a; --gold: #f5c518; --text: #f6f3ee; --muted: #9b9790;
+      --line: rgba(255,255,255,.08); --glow: rgba(255,42,42,.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+    body {
+      font-family: Outfit, system-ui, sans-serif; min-height: 100vh;
+      background:
+        radial-gradient(1200px 500px at 50% -10%, rgba(255,42,42,.18), transparent 55%),
+        radial-gradient(800px 400px at 100% 10%, rgba(245,197,24,.05), transparent 45%),
+        linear-gradient(180deg, #0c0c10 0%, var(--bg) 40%);
+    }
+    .wrap { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 80px; position: relative; }
+    header { text-align: center; padding: 22px 0 10px; }
+    .kicker { letter-spacing: .28em; font-size: .72rem; font-weight: 600; color: var(--red); text-transform: uppercase; }
+    h1 { font-family: "Bebas Neue", sans-serif; font-size: clamp(2.8rem, 8vw, 5.4rem); line-height: .85; margin: 10px 0 8px; letter-spacing: .02em; }
+    h1 span { color: var(--red); }
+    .meta { color: var(--muted); font-size: .95rem; display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; }
+    .meta a, footer a { color: var(--text); text-decoration: none; border-bottom: 1px solid rgba(255,42,42,.6); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; margin: 30px 0 14px; }
+    .seg { display: inline-flex; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px; gap: 2px; flex-wrap: wrap; }
+    .seg button, .nav button, .nav input {
+      appearance: none; background: transparent; color: var(--text); border: 0; border-radius: 999px;
+      font-family: inherit; font-size: .9rem; font-weight: 600; padding: 8px 14px; cursor: pointer;
+    }
+    .seg button[aria-pressed="true"] { background: var(--red); box-shadow: 0 6px 20px var(--glow); }
+    .seg button:not([aria-pressed="true"]):hover { background: rgba(255,255,255,.06); }
+    .nav { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+    .nav button { padding: 8px 12px; }
+    .nav button:hover:not(:disabled) { background: rgba(255,255,255,.06); }
+    .nav button:disabled { opacity: .3; cursor: default; }
+    .nav input { color-scheme: dark; padding: 6px 8px; font-weight: 500; width: 150px; }
+    .period { font-family: "Bebas Neue", sans-serif; font-size: clamp(1.7rem, 4.5vw, 2.4rem); letter-spacing: .04em; text-align: center; margin: 6px 0 4px; }
+    .partial { text-align: center; color: #f0d784; font-size: .82rem; min-height: 1.2em; }
+    .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 16px 0; }
+    .kpi { background: linear-gradient(180deg, var(--card-2), var(--card)); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; }
+    .kpi .lbl { color: var(--muted); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; }
+    .kpi .val { font-family: "Bebas Neue", sans-serif; font-size: 2.3rem; line-height: 1.05; margin-top: 4px; }
+    .kpi .val small { font-size: 1rem; color: var(--muted); margin-left: 2px; }
+    .kpi .delta { font-size: .78rem; color: var(--muted); }
+    .kpi .delta.up { color: #6fdc8c; } .kpi .delta.down { color: #ff7a7a; }
+    .panel { background: rgba(16,16,20,.72); border: 1px solid var(--line); border-radius: 24px; padding: 18px; backdrop-filter: blur(8px); }
+    .chart-box { position: relative; height: 380px; }
+    .hint { color: var(--muted); font-size: .78rem; text-align: center; margin-top: 8px; }
+    h2 { font-family: "Bebas Neue", sans-serif; letter-spacing: .08em; font-size: 1.5rem; margin: 28px 0 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    th { text-align: left; color: var(--muted); font-weight: 500; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; padding: 8px 10px; }
+    td { padding: 10px; border-top: 1px solid var(--line); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .bar { height: 8px; border-radius: 999px; background: rgba(255,255,255,.06); overflow: hidden; min-width: 80px; }
+    .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); border-radius: 999px; }
+    footer { margin-top: 36px; color: var(--muted); font-size: .82rem; line-height: 1.55; text-align: center; }
+    footer p { max-width: 680px; margin: 6px auto; }
+    @media (max-width: 760px) {
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .kpis .kpi:last-child { grid-column: span 2; }
+      .toolbar { justify-content: center; }
+      .chart-box { height: 320px; }
+      .seg button { padding: 7px 11px; font-size: .85rem; }
+      .panel { padding: 10px; border-radius: 18px; }
+      td, th { padding: 8px 5px; }
+      th { font-size: .62rem; letter-spacing: .04em; }
+      .bar { min-width: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="kicker">Brooklyn Fitboxing Ourense</div>
+      <h1>Ocupación <span>de sacos</span></h1>
+      <div class="meta" id="meta"></div>
+    </header>
+
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Vista">
+        <button type="button" data-view="hist">Histórico</button>
+        <button type="button" data-view="year">Año</button>
+        <button type="button" data-view="month">Mes</button>
+        <button type="button" data-view="week">Semana</button>
+        <button type="button" data-view="day">Día</button>
+      </div>
+      <div class="nav">
+        <button type="button" id="prev" aria-label="Periodo anterior">◀</button>
+        <input type="date" id="jump" aria-label="Ir a fecha">
+        <button type="button" id="next" aria-label="Periodo siguiente">▶</button>
+        <button type="button" id="latest">Último</button>
+      </div>
+    </div>
+
+    <div class="period" id="period"></div>
+    <div class="partial" id="partial"></div>
+    <section class="kpis" id="kpis"></section>
+    <section class="panel">
+      <div class="chart-box"><canvas id="chart" aria-label="Gráfica de ocupación"></canvas></div>
+      <div class="hint" id="hint"></div>
+    </section>
+
+    <h2 id="table-title"></h2>
+    <section class="panel" style="overflow-x:auto"><table id="table"></table></section>
+
+    <footer>
+      <p><strong>Fitboxers</strong> = suma de asistentes reales a cada clase (sin reservas no presentadas ni clases canceladas). <strong>Ocupación</strong> = fitboxers ÷ sacos disponibles (capacidad de cada clase). <strong>Media</strong> = fitboxers por clase.</p>
+      <p>Hora de Madrid. Semanas de lunes a domingo. Solo datos agregados; no aparece ningún dato personal.</p>
+      <p><a href="../">← Volver a la Auren League</a></p>
+    </footer>
+  </div>
+  <script id="ocupa-data" type="application/json">__OCUPA_DATA_JSON__</script>
+  <script>
+  (function () {
+    const data = JSON.parse(document.getElementById("ocupa-data").textContent);
+    const MONTHS = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const MON3 = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+    const DOW = ["lun","mar","mié","jue","vie","sáb","dom"];
+    const nf = new Intl.NumberFormat("es-ES");
+    const nf1 = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+
+    // Fechas como "YYYY-MM-DD" con aritmética en UTC (sin saltos por horario de verano).
+    const toD = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+    const toS = (dt) => dt.toISOString().slice(0, 10);
+    const addDays = (s, n) => { const d = toD(s); d.setUTCDate(d.getUTCDate() + n); return toS(d); };
+    const dow = (s) => (toD(s).getUTCDay() + 6) % 7; // 0 = lunes
+    const monday = (s) => addDays(s, -dow(s));
+    const ym = (s) => s.slice(0, 7);
+    const addMonths = (s, n) => { const d = toD(s.slice(0, 7) + "-01"); d.setUTCMonth(d.getUTCMonth() + n); return toS(d); };
+    const daysInMonth = (s) => { const d = toD(s.slice(0, 7) + "-01"); d.setUTCMonth(d.getUTCMonth() + 1); d.setUTCDate(0); return d.getUTCDate(); };
+    const fmtShort = (s) => `${Number(s.slice(8, 10))} ${MON3[Number(s.slice(5, 7)) - 1]}`;
+    const fmtLong = (s) => `${DOW[dow(s)]} ${Number(s.slice(8, 10))} de ${MONTHS[Number(s.slice(5, 7)) - 1]} de ${s.slice(0, 4)}`;
+    const fmtDMY = (s) => `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}`;
+
+    const classes = data.classes.map(([start, a, cap, ns]) => ({ d: start.slice(0, 10), t: start.slice(11, 16), a, cap: cap || 0, ns: ns || 0 }));
+    const byDay = new Map();
+    for (const c of classes) { if (!byDay.has(c.d)) byDay.set(c.d, []); byDay.get(c.d).push(c); }
+    const FIRST = data.first, LAST = data.last;
+
+    const meta = document.getElementById("meta");
+    const gen = data.generated_at ? new Date(data.generated_at).toLocaleString("es-ES", { timeZone: data.timezone, dateStyle: "short", timeStyle: "short" }) : "";
+    meta.innerHTML = `<span>Datos del ${fmtDMY(FIRST)} al ${fmtDMY(LAST)}</span><span>Actualizado ${gen}</span><a href="../">Auren League</a>`;
+
+    const agg = (list) => {
+      const r = { a: 0, n: 0, cap: 0, ns: 0 };
+      for (const c of list) { r.a += c.a; r.n += 1; r.cap += c.cap; r.ns += c.ns; }
+      r.avg = r.n ? r.a / r.n : 0;
+      r.occ = r.cap ? (100 * r.a) / r.cap : null;
+      return r;
+    };
+    const inRange = (from, to) => { // to exclusivo
+      const out = [];
+      for (let s = from; s < to; s = addDays(s, 1)) { const l = byDay.get(s); if (l) out.push(...l); }
+      return out;
+    };
+
+    // Periodo de cada vista: [desde, hasta) y cubos.
+    function periodOf(view, anchor) {
+      if (view === "hist") {
+        const from = FIRST.slice(0, 7) + "-01", to = addMonths(LAST, 1);
+        const buckets = [];
+        for (let m = from; m < to; m = addMonths(m, 1)) buckets.push({ key: m, label: `${MON3[Number(m.slice(5, 7)) - 1]} ${m.slice(2, 4)}`, title: `${MONTHS[Number(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`, from: m, to: addMonths(m, 1), drill: "month" });
+        return { from, to, title: "Todo el histórico", buckets, unit: "mes" };
+      }
+      if (view === "year") {
+        const y = anchor.slice(0, 4), from = `${y}-01-01`, to = `${Number(y) + 1}-01-01`;
+        const buckets = [];
+        for (let i = 0; i < 12; i++) { const m = addMonths(from, i); buckets.push({ key: m, label: MON3[i], title: `${MONTHS[i]} ${y}`, from: m, to: addMonths(m, 1), drill: "month" }); }
+        return { from, to, title: `Año ${y}`, buckets, unit: "mes", prev: `${Number(y) - 1}-01-01`, next: `${Number(y) + 1}-01-01` };
+      }
+      if (view === "month") {
+        const from = anchor.slice(0, 7) + "-01", to = addMonths(from, 1), n = daysInMonth(from);
+        const buckets = [];
+        for (let i = 0; i < n; i++) { const d = addDays(from, i); buckets.push({ key: d, label: `${i + 1}`, title: fmtLong(d), from: d, to: addDays(d, 1), drill: "day", weekend: dow(d) >= 5 }); }
+        const mi = Number(from.slice(5, 7)) - 1;
+        return { from, to, title: `${MONTHS[mi][0].toUpperCase() + MONTHS[mi].slice(1)} ${from.slice(0, 4)}`, buckets, unit: "día", prev: addMonths(from, -1), next: to };
+      }
+      if (view === "week") {
+        const from = monday(anchor), to = addDays(from, 7);
+        const buckets = [];
+        for (let i = 0; i < 7; i++) { const d = addDays(from, i); buckets.push({ key: d, label: `${DOW[i]} ${Number(d.slice(8, 10))}`, title: fmtLong(d), from: d, to: addDays(d, 1), drill: "day" }); }
+        return { from, to, title: `Semana del ${fmtShort(from)} al ${fmtShort(addDays(from, 6))} ${addDays(from, 6).slice(0, 4)}`, buckets, unit: "día", prev: addDays(from, -7), next: to };
+      }
+      // día: una barra por clase
+      const list = (byDay.get(anchor) || []).slice().sort((x, y) => x.t.localeCompare(y.t));
+      const buckets = list.map((c) => ({ key: anchor + c.t, label: c.t, title: `Clase de las ${c.t}`, list: [c] }));
+      return { from: anchor, to: addDays(anchor, 1), title: fmtLong(anchor).replace(/^./, (x) => x.toUpperCase()), buckets, unit: "clase", prev: addDays(anchor, -1), next: addDays(anchor, 1) };
+    }
+
+    const params = new URLSearchParams(location.hash.slice(1));
+    const state = {
+      view: ["hist", "year", "month", "week", "day"].includes(params.get("v")) ? params.get("v") : "month",
+      anchor: /^\d{4}-\d{2}-\d{2}$/.test(params.get("d") || "") ? params.get("d") : LAST,
+    };
+
+    const ctx = document.getElementById("chart");
+    Chart.defaults.color = "#9b9790";
+    Chart.defaults.font.family = "Outfit, system-ui, sans-serif";
+    let current = null;
+    const chart = new Chart(ctx, {
+      data: { labels: [], datasets: [
+        { type: "bar", label: "Fitboxers", data: [], yAxisID: "y", backgroundColor: "rgba(255,42,42,.78)", hoverBackgroundColor: "#ff2a2a", borderRadius: 6, maxBarThickness: 46, order: 2 },
+        { type: "line", label: "Ocupación %", data: [], yAxisID: "y1", borderColor: "#f5c518", backgroundColor: "#f5c518", pointRadius: 3, pointHoverRadius: 6, tension: .3, spanGaps: true, order: 1 },
+      ] },
+      options: {
+        responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+        scales: {
+          x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true } },
+          y: { beginAtZero: true, grid: { color: "rgba(255,255,255,.06)" }, title: { display: true, text: "Fitboxers" }, ticks: { precision: 0 } },
+          y1: { position: "right", beginAtZero: true, suggestedMax: 100, grid: { display: false }, title: { display: true, text: "Ocupación %" }, ticks: { callback: (v) => v + "%" } },
+        },
+        plugins: {
+          legend: { labels: { usePointStyle: true, boxWidth: 8 } },
+          tooltip: {
+            backgroundColor: "rgba(16,16,20,.95)", borderColor: "rgba(255,42,42,.4)", borderWidth: 1, padding: 12,
+            callbacks: {
+              title: (items) => current && items.length ? current.buckets[items[0].dataIndex].title : "",
+              label: (item) => item.dataset.yAxisID === "y1"
+                ? `Ocupación: ${item.raw == null ? "—" : nf1.format(item.raw) + " %"}`
+                : `Fitboxers: ${nf.format(item.raw)}`,
+              afterBody: (items) => {
+                if (!current || !items.length) return [];
+                const r = current.stats[items[0].dataIndex];
+                if (!r.n) return ["Sin clases"];
+                const lines = [`Sacos disponibles: ${nf.format(r.cap)}`];
+                if (state.view !== "day") lines.unshift(`Clases: ${r.n} · media ${nf1.format(r.avg)} por clase`);
+                if (r.ns) lines.push(`No-shows: ${r.ns}`);
+                return lines;
+              },
+            },
+          },
+        },
+        onClick: (_e, els) => {
+          if (!els.length || !current) return;
+          const b = current.buckets[els[0].index];
+          if (b.drill) { state.view = b.drill; state.anchor = b.from; render(); }
+        },
+      },
+    });
+
+    let deltaLabel = "vs periodo anterior";
+    function kpi(label, value, unit, prevVal, fmt) {
+      let delta = "";
+      if (prevVal != null && value != null && prevVal > 0) {
+        const pct = (100 * (value - prevVal)) / prevVal;
+        const cls = pct > 0.5 ? "up" : pct < -0.5 ? "down" : "";
+        delta = `<div class="delta ${cls}">${pct >= 0 ? "▲" : "▼"} ${nf1.format(Math.abs(pct))} % ${deltaLabel}</div>`;
+      } else delta = `<div class="delta">&nbsp;</div>`;
+      return `<div class="kpi"><div class="lbl">${label}</div><div class="val">${value == null ? "—" : fmt(value)}${unit ? `<small>${unit}</small>` : ""}</div>${delta}</div>`;
+    }
+
+    function render() {
+      const p = periodOf(state.view, state.anchor);
+      p.stats = p.buckets.map((b) => agg(b.list || inRange(b.from, b.to)));
+      current = p;
+      document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
+      document.getElementById("period").textContent = p.title;
+      const partial = state.view !== "hist" && p.from <= LAST && LAST < addDays(p.to, -1);
+      document.getElementById("partial").textContent = partial ? `Periodo en curso: datos hasta el ${fmtDMY(LAST)}` : (state.view === "day" && state.anchor === LAST) ? "Día en curso: solo aparecen las clases ya registradas" : (state.view === "hist" ? `Datos desde el ${fmtDMY(FIRST)} (el primer mes está incompleto)` : "");
+      const prevBtn = document.getElementById("prev"), nextBtn = document.getElementById("next");
+      prevBtn.disabled = !p.prev || p.from <= FIRST; nextBtn.disabled = !p.next || p.next > LAST;
+      document.getElementById("jump").value = state.view === "hist" ? LAST : state.anchor;
+      document.getElementById("jump").disabled = state.view === "hist";
+
+      const total = agg(inRange(p.from, p.to));
+      let prevTotal = null;
+      const cmp = state.view === "day" ? addDays(state.anchor, -7) : p.prev;
+      deltaLabel = state.view === "day" ? `vs ${DOW[dow(state.anchor)]} anterior` : "vs periodo anterior";
+      if (cmp) { const pp = periodOf(state.view === "day" ? "week" : state.view, cmp); const r = state.view === "day" ? { from: cmp, to: addDays(cmp, 1) } : pp; if (r.from >= FIRST) prevTotal = agg(inRange(r.from, r.to)); }
+      const pv = (k) => (prevTotal && prevTotal.n ? prevTotal[k] : null);
+      document.getElementById("kpis").innerHTML =
+        kpi("Fitboxers", total.a, "", partial ? null : pv("a"), nf.format) +
+        kpi("Clases", total.n, "", partial ? null : pv("n"), nf.format) +
+        kpi("Media por clase", total.n ? total.avg : null, "", pv("avg"), nf1.format) +
+        kpi("Ocupación", total.occ, "%", pv("occ"), nf1.format) +
+        kpi("No-shows", total.ns, "", null, nf.format);
+
+      chart.data.labels = p.buckets.map((b) => b.label);
+      chart.data.datasets[0].data = p.stats.map((r) => r.a);
+      chart.data.datasets[0].backgroundColor = p.buckets.map((b) => b.weekend ? "rgba(255,42,42,.45)" : "rgba(255,42,42,.78)");
+      chart.data.datasets[1].data = p.stats.map((r) => (r.n && r.occ != null ? Math.round(r.occ * 10) / 10 : null));
+      chart.update();
+      document.getElementById("hint").textContent = !p.buckets.length ? "No hay clases con asistencia este día."
+        : state.view === "day" ? "Cada barra es una clase. Pasa el dedo o el ratón para ver los detalles."
+        : `Cada barra es un ${p.unit}. Pulsa una barra para ver el detalle.`;
+
+      renderTable(p, total);
+      const h = new URLSearchParams({ v: state.view, d: state.anchor }).toString();
+      history.replaceState(null, "", "#" + h);
+    }
+
+    function renderTable(p, total) {
+      const t = document.getElementById("table"), title = document.getElementById("table-title");
+      let rows;
+      if (state.view === "day") {
+        title.textContent = "Clases del día";
+        rows = p.buckets.map((b, i) => ({ k: b.label, r: p.stats[i] }));
+      } else {
+        title.textContent = "Por hora de clase";
+        const byTime = new Map();
+        for (const c of inRange(p.from, p.to)) { if (!byTime.has(c.t)) byTime.set(c.t, []); byTime.get(c.t).push(c); }
+        rows = [...byTime.keys()].sort().map((k) => ({ k, r: agg(byTime.get(k)) }));
+      }
+      if (!rows.length) { t.innerHTML = `<tr><td style="text-align:center;color:var(--muted)">Sin clases en este periodo</td></tr>`; return; }
+      const head = state.view === "day"
+        ? `<tr><th>Hora</th><th class="num">Fitboxers</th><th class="num">Sacos</th><th>Ocupación</th><th class="num">No-shows</th></tr>`
+        : `<tr><th>Hora</th><th class="num">Clases</th><th class="num">Fitboxers</th><th class="num">Media</th><th>Ocupación</th></tr>`;
+      const occCell = (r) => r.occ == null ? "<td>—</td>" : `<td><div style="display:flex;gap:8px;align-items:center"><div class="bar" style="flex:1"><i style="width:${Math.min(100, r.occ)}%"></i></div><span class="num">${Math.round(r.occ)}%</span></div></td>`;
+      t.innerHTML = head + rows.map(({ k, r }) => state.view === "day"
+        ? `<tr><td>${k}</td><td class="num">${r.a}</td><td class="num">${r.cap || "—"}</td>${occCell(r)}<td class="num">${r.ns}</td></tr>`
+        : `<tr><td>${k}</td><td class="num">${nf.format(r.n)}</td><td class="num">${nf.format(r.a)}</td><td class="num">${nf1.format(r.avg)}</td>${occCell(r)}</tr>`).join("");
+    }
+
+    document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+      const v = b.dataset.view;
+      if (v === "day" && !byDay.has(state.anchor)) {
+        // Ir al último día con clases dentro o antes del periodo actual.
+        const p = periodOf(state.view, state.anchor);
+        let s = addDays(p.to < addDays(LAST, 1) ? p.to : addDays(LAST, 1), -1);
+        while (s >= FIRST && !byDay.has(s)) s = addDays(s, -1);
+        if (s >= FIRST) state.anchor = s;
+      }
+      state.view = v; render();
+    }));
+    document.getElementById("prev").addEventListener("click", () => { const p = periodOf(state.view, state.anchor); if (p.prev) { state.anchor = p.prev; render(); } });
+    document.getElementById("next").addEventListener("click", () => { const p = periodOf(state.view, state.anchor); if (p.next) { state.anchor = p.next; render(); } });
+    document.getElementById("latest").addEventListener("click", () => { state.anchor = LAST; render(); });
+    document.getElementById("jump").addEventListener("change", (e) => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { state.anchor = e.target.value; render(); } });
+    document.getElementById("jump").min = FIRST; document.getElementById("jump").max = LAST;
+    render();
+  })();
+  </script>
+</body>
+</html>
