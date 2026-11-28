@@ -4,12 +4,12 @@
   "timezone": "Europe/Madrid",
   "start": "2026-11-09",
   "end": "2026-11-28",
-  "generated_at": "2026-11-28T11:17:41+01:00",
+  "generated_at": "2026-11-28T12:13:11+01:00",
   "data_until": "2026-11-28",
   "top": 40,
-  "total_ranked": 174,
-  "people_with_attendance": 174,
-  "attended_classes": 91,
+  "total_ranked": 176,
+  "people_with_attendance": 176,
+  "attended_classes": 92,
   "social_pending": false,
   "referral_links": 454,
   "rules": {
@@ -182,8 +182,181 @@
       ]
     },
     {
-      "key": "db2437f88e914df7",
+      "key": "6865f58e4a02be73",
       "rank": 2,
+      "name": "Elissa D.",
+      "initials": "ED",
+      "photo": "img/6865f58e4a02be73.jpg",
+      "points": 80,
+      "training_days": 14,
+      "classes": 14,
+      "breakdown": [
+        {
+          "key": "vuelta",
+          "label": "Vuelta",
+          "points": 0,
+          "count": 0,
+          "detail": "sin vueltas",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "racha_2s",
+          "label": "Racha 2 semanas",
+          "points": 10,
+          "count": 1,
+          "detail": "1 × 10",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-17",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 10,
+              "reason": "Racha: semana 2 consecutiva (16–22 nov)"
+            }
+          ]
+        },
+        {
+          "key": "racha_mes",
+          "label": "Racha 1 mes",
+          "points": 0,
+          "count": 0,
+          "detail": "sin racha",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "rutina",
+          "label": "Rutina",
+          "points": 70,
+          "count": 11,
+          "detail": "3 × 5 (día 2) + 3 × 6 (día 3) + 3 × 7 (día 4) + 2 × 8 (día 5)",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-10",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 5,
+              "reason": "2.º día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-11",
+              "time": "12:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 6,
+              "reason": "3.er día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-12",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 7,
+              "reason": "4.º día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-14",
+              "time": "10:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 8,
+              "reason": "5.º día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-17",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 5,
+              "reason": "2.º día de la semana 16–22 nov"
+            },
+            {
+              "date": "2026-11-18",
+              "time": "20:30",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 6,
+              "reason": "3.er día de la semana 16–22 nov"
+            },
+            {
+              "date": "2026-11-19",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 7,
+              "reason": "4.º día de la semana 16–22 nov"
+            },
+            {
+              "date": "2026-11-24",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 5,
+              "reason": "2.º día de la semana 23–29 nov"
+            },
+            {
+              "date": "2026-11-25",
+              "time": "20:30",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 6,
+              "reason": "3.er día de la semana 23–29 nov"
+            },
+            {
+              "date": "2026-11-26",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 7,
+              "reason": "4.º día de la semana 23–29 nov"
+            },
+            {
+              "date": "2026-11-28",
+              "time": "11:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 8,
+              "reason": "5.º día de la semana 23–29 nov"
+            }
+          ]
+        },
+        {
+          "key": "doblete",
+          "label": "Doblete",
+          "points": 0,
+          "count": 0,
+          "detail": "sin dobletes",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_reserva",
+          "label": "I ❤️ BF reservas",
+          "points": 0,
+          "count": 0,
+          "detail": "sin reservas de invitados",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_conversion",
+          "label": "I ❤️ BF conversiones",
+          "points": 0,
+          "count": 0,
+          "detail": "sin conversiones de invitados",
+          "pending": false,
+          "events": []
+        }
+      ]
+    },
+    {
+      "key": "db2437f88e914df7",
+      "rank": 3,
       "name": "Adriana M.",
       "initials": "AM",
       "photo": "img/db2437f88e914df7.jpg",
@@ -326,171 +499,6 @@
               "reason": "Doblete: 2 clases (09:30, 10:30)"
             }
           ]
-        },
-        {
-          "key": "invitacion_reserva",
-          "label": "I ❤️ BF reservas",
-          "points": 0,
-          "count": 0,
-          "detail": "sin reservas de invitados",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "invitacion_conversion",
-          "label": "I ❤️ BF conversiones",
-          "points": 0,
-          "count": 0,
-          "detail": "sin conversiones de invitados",
-          "pending": false,
-          "events": []
-        }
-      ]
-    },
-    {
-      "key": "6865f58e4a02be73",
-      "rank": 3,
-      "name": "Elissa D.",
-      "initials": "ED",
-      "photo": "img/6865f58e4a02be73.jpg",
-      "points": 72,
-      "training_days": 13,
-      "classes": 13,
-      "breakdown": [
-        {
-          "key": "vuelta",
-          "label": "Vuelta",
-          "points": 0,
-          "count": 0,
-          "detail": "sin vueltas",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "racha_2s",
-          "label": "Racha 2 semanas",
-          "points": 10,
-          "count": 1,
-          "detail": "1 × 10",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-17",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 10,
-              "reason": "Racha: semana 2 consecutiva (16–22 nov)"
-            }
-          ]
-        },
-        {
-          "key": "racha_mes",
-          "label": "Racha 1 mes",
-          "points": 0,
-          "count": 0,
-          "detail": "sin racha",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "rutina",
-          "label": "Rutina",
-          "points": 62,
-          "count": 10,
-          "detail": "3 × 5 (día 2) + 3 × 6 (día 3) + 3 × 7 (día 4) + 1 × 8 (día 5)",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-10",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 5,
-              "reason": "2.º día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-11",
-              "time": "12:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 6,
-              "reason": "3.er día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-12",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 7,
-              "reason": "4.º día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-14",
-              "time": "10:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 8,
-              "reason": "5.º día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-17",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 5,
-              "reason": "2.º día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-18",
-              "time": "20:30",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 6,
-              "reason": "3.er día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-19",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 7,
-              "reason": "4.º día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-24",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 5,
-              "reason": "2.º día de la semana 23–29 nov"
-            },
-            {
-              "date": "2026-11-25",
-              "time": "20:30",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 6,
-              "reason": "3.er día de la semana 23–29 nov"
-            },
-            {
-              "date": "2026-11-26",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 7,
-              "reason": "4.º día de la semana 23–29 nov"
-            }
-          ]
-        },
-        {
-          "key": "doblete",
-          "label": "Doblete",
-          "points": 0,
-          "count": 0,
-          "detail": "sin dobletes",
-          "pending": false,
-          "events": []
         },
         {
           "key": "invitacion_reserva",
@@ -1541,8 +1549,157 @@
       ]
     },
     {
-      "key": "c3914d025f467a8a",
+      "key": "c9d09b1520d34cc0",
       "rank": 11,
+      "name": "Rubén G.",
+      "initials": "RG",
+      "photo": "img/c9d09b1520d34cc0.jpg",
+      "points": 57,
+      "training_days": 11,
+      "classes": 11,
+      "breakdown": [
+        {
+          "key": "vuelta",
+          "label": "Vuelta",
+          "points": 0,
+          "count": 0,
+          "detail": "sin vueltas",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "racha_2s",
+          "label": "Racha 2 semanas",
+          "points": 10,
+          "count": 1,
+          "detail": "1 × 10",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-17",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 10,
+              "reason": "Racha: semana 2 consecutiva (16–22 nov)"
+            }
+          ]
+        },
+        {
+          "key": "racha_mes",
+          "label": "Racha 1 mes",
+          "points": 0,
+          "count": 0,
+          "detail": "sin racha",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "rutina",
+          "label": "Rutina",
+          "points": 47,
+          "count": 8,
+          "detail": "3 × 5 (día 2) + 3 × 6 (día 3) + 2 × 7 (día 4)",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-12",
+              "time": "17:00",
+              "class_name": "Fitboxing",
+              "trainer": null,
+              "points": 5,
+              "reason": "2.º día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-14",
+              "time": "11:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 6,
+              "reason": "3.er día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-17",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 5,
+              "reason": "2.º día de la semana 16–22 nov"
+            },
+            {
+              "date": "2026-11-18",
+              "time": "20:30",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 6,
+              "reason": "3.er día de la semana 16–22 nov"
+            },
+            {
+              "date": "2026-11-21",
+              "time": "10:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 7,
+              "reason": "4.º día de la semana 16–22 nov"
+            },
+            {
+              "date": "2026-11-25",
+              "time": "20:30",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 5,
+              "reason": "2.º día de la semana 23–29 nov"
+            },
+            {
+              "date": "2026-11-26",
+              "time": "17:00",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 6,
+              "reason": "3.er día de la semana 23–29 nov"
+            },
+            {
+              "date": "2026-11-28",
+              "time": "11:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 7,
+              "reason": "4.º día de la semana 23–29 nov"
+            }
+          ]
+        },
+        {
+          "key": "doblete",
+          "label": "Doblete",
+          "points": 0,
+          "count": 0,
+          "detail": "sin dobletes",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_reserva",
+          "label": "I ❤️ BF reservas",
+          "points": 0,
+          "count": 0,
+          "detail": "sin reservas de invitados",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_conversion",
+          "label": "I ❤️ BF conversiones",
+          "points": 0,
+          "count": 0,
+          "detail": "sin conversiones de invitados",
+          "pending": false,
+          "events": []
+        }
+      ]
+    },
+    {
+      "key": "c3914d025f467a8a",
+      "rank": 12,
       "name": "Celia Maria L.",
       "initials": "CL",
       "photo": "img/c3914d025f467a8a.jpg",
@@ -1683,7 +1840,7 @@
     },
     {
       "key": "e09a01a9c9728d8a",
-      "rank": 12,
+      "rank": 13,
       "name": "Aixa I.",
       "initials": "AI",
       "photo": "img/e09a01a9c9728d8a.jpg",
@@ -1796,147 +1953,6 @@
               "reason": "I ❤️ BF: Kevin I. se hizo cliente"
             }
           ]
-        }
-      ]
-    },
-    {
-      "key": "c9d09b1520d34cc0",
-      "rank": 13,
-      "name": "Rubén G.",
-      "initials": "RG",
-      "photo": "img/c9d09b1520d34cc0.jpg",
-      "points": 50,
-      "training_days": 10,
-      "classes": 10,
-      "breakdown": [
-        {
-          "key": "vuelta",
-          "label": "Vuelta",
-          "points": 0,
-          "count": 0,
-          "detail": "sin vueltas",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "racha_2s",
-          "label": "Racha 2 semanas",
-          "points": 10,
-          "count": 1,
-          "detail": "1 × 10",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-17",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 10,
-              "reason": "Racha: semana 2 consecutiva (16–22 nov)"
-            }
-          ]
-        },
-        {
-          "key": "racha_mes",
-          "label": "Racha 1 mes",
-          "points": 0,
-          "count": 0,
-          "detail": "sin racha",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "rutina",
-          "label": "Rutina",
-          "points": 40,
-          "count": 7,
-          "detail": "3 × 5 (día 2) + 3 × 6 (día 3) + 1 × 7 (día 4)",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-12",
-              "time": "17:00",
-              "class_name": "Fitboxing",
-              "trainer": null,
-              "points": 5,
-              "reason": "2.º día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-14",
-              "time": "11:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 6,
-              "reason": "3.er día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-17",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 5,
-              "reason": "2.º día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-18",
-              "time": "20:30",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 6,
-              "reason": "3.er día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-21",
-              "time": "10:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 7,
-              "reason": "4.º día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-25",
-              "time": "20:30",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 5,
-              "reason": "2.º día de la semana 23–29 nov"
-            },
-            {
-              "date": "2026-11-26",
-              "time": "17:00",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 6,
-              "reason": "3.er día de la semana 23–29 nov"
-            }
-          ]
-        },
-        {
-          "key": "doblete",
-          "label": "Doblete",
-          "points": 0,
-          "count": 0,
-          "detail": "sin dobletes",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "invitacion_reserva",
-          "label": "I ❤️ BF reservas",
-          "points": 0,
-          "count": 0,
-          "detail": "sin reservas de invitados",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "invitacion_conversion",
-          "label": "I ❤️ BF conversiones",
-          "points": 0,
-          "count": 0,
-          "detail": "sin conversiones de invitados",
-          "pending": false,
-          "events": []
         }
       ]
     },
@@ -2200,8 +2216,141 @@
       ]
     },
     {
-      "key": "8cb7bd06e8e573ca",
+      "key": "46b53b5a274ee8b9",
       "rank": 16,
+      "name": "Cristina F.",
+      "initials": "CF",
+      "photo": "img/46b53b5a274ee8b9.jpg",
+      "points": 44,
+      "training_days": 9,
+      "classes": 9,
+      "breakdown": [
+        {
+          "key": "vuelta",
+          "label": "Vuelta",
+          "points": 0,
+          "count": 0,
+          "detail": "sin vueltas",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "racha_2s",
+          "label": "Racha 2 semanas",
+          "points": 10,
+          "count": 1,
+          "detail": "1 × 10",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-19",
+              "time": "18:00",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 10,
+              "reason": "Racha: semana 2 consecutiva (16–22 nov)"
+            }
+          ]
+        },
+        {
+          "key": "racha_mes",
+          "label": "Racha 1 mes",
+          "points": 0,
+          "count": 0,
+          "detail": "sin racha",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "rutina",
+          "label": "Rutina",
+          "points": 34,
+          "count": 6,
+          "detail": "3 × 5 (día 2) + 2 × 6 (día 3) + 1 × 7 (día 4)",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-12",
+              "time": "18:00",
+              "class_name": "Fitboxing",
+              "trainer": null,
+              "points": 5,
+              "reason": "2.º día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-15",
+              "time": "12:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 6,
+              "reason": "3.er día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-19",
+              "time": "18:00",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 5,
+              "reason": "2.º día de la semana 16–22 nov"
+            },
+            {
+              "date": "2026-11-24",
+              "time": "18:00",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 5,
+              "reason": "2.º día de la semana 23–29 nov"
+            },
+            {
+              "date": "2026-11-25",
+              "time": "17:30",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 6,
+              "reason": "3.er día de la semana 23–29 nov"
+            },
+            {
+              "date": "2026-11-28",
+              "time": "11:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 7,
+              "reason": "4.º día de la semana 23–29 nov"
+            }
+          ]
+        },
+        {
+          "key": "doblete",
+          "label": "Doblete",
+          "points": 0,
+          "count": 0,
+          "detail": "sin dobletes",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_reserva",
+          "label": "I ❤️ BF reservas",
+          "points": 0,
+          "count": 0,
+          "detail": "sin reservas de invitados",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_conversion",
+          "label": "I ❤️ BF conversiones",
+          "points": 0,
+          "count": 0,
+          "detail": "sin conversiones de invitados",
+          "pending": false,
+          "events": []
+        }
+      ]
+    },
+    {
+      "key": "8cb7bd06e8e573ca",
+      "rank": 17,
       "name": "Sonia B.",
       "initials": "SB",
       "photo": "img/8cb7bd06e8e573ca.jpg",
@@ -2333,8 +2482,141 @@
       ]
     },
     {
+      "key": "f1c3e451c0790d49",
+      "rank": 18,
+      "name": "Rebeca G.",
+      "initials": "RG",
+      "photo": "img/f1c3e451c0790d49.jpg",
+      "points": 43,
+      "training_days": 9,
+      "classes": 9,
+      "breakdown": [
+        {
+          "key": "vuelta",
+          "label": "Vuelta",
+          "points": 0,
+          "count": 0,
+          "detail": "sin vueltas",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "racha_2s",
+          "label": "Racha 2 semanas",
+          "points": 10,
+          "count": 1,
+          "detail": "1 × 10",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-18",
+              "time": "20:30",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 10,
+              "reason": "Racha: semana 2 consecutiva (16–22 nov)"
+            }
+          ]
+        },
+        {
+          "key": "racha_mes",
+          "label": "Racha 1 mes",
+          "points": 0,
+          "count": 0,
+          "detail": "sin racha",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "rutina",
+          "label": "Rutina",
+          "points": 33,
+          "count": 6,
+          "detail": "3 × 5 (día 2) + 3 × 6 (día 3)",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-12",
+              "time": "09:30",
+              "class_name": "Fitboxing",
+              "trainer": "Paola C.",
+              "points": 5,
+              "reason": "2.º día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-14",
+              "time": "11:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 6,
+              "reason": "3.er día de la semana 9–15 nov"
+            },
+            {
+              "date": "2026-11-18",
+              "time": "20:30",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 5,
+              "reason": "2.º día de la semana 16–22 nov"
+            },
+            {
+              "date": "2026-11-21",
+              "time": "10:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 6,
+              "reason": "3.er día de la semana 16–22 nov"
+            },
+            {
+              "date": "2026-11-25",
+              "time": "20:30",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 5,
+              "reason": "2.º día de la semana 23–29 nov"
+            },
+            {
+              "date": "2026-11-28",
+              "time": "11:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 6,
+              "reason": "3.er día de la semana 23–29 nov"
+            }
+          ]
+        },
+        {
+          "key": "doblete",
+          "label": "Doblete",
+          "points": 0,
+          "count": 0,
+          "detail": "sin dobletes",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_reserva",
+          "label": "I ❤️ BF reservas",
+          "points": 0,
+          "count": 0,
+          "detail": "sin reservas de invitados",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_conversion",
+          "label": "I ❤️ BF conversiones",
+          "points": 0,
+          "count": 0,
+          "detail": "sin conversiones de invitados",
+          "pending": false,
+          "events": []
+        }
+      ]
+    },
+    {
       "key": "0eb813facba4d344",
-      "rank": 17,
+      "rank": 19,
       "name": "María Isabel R.",
       "initials": "MR",
       "photo": "img/0eb813facba4d344.jpg",
@@ -2452,7 +2734,7 @@
     },
     {
       "key": "f59542e0b3e4908f",
-      "rank": 18,
+      "rank": 20,
       "name": "Nuria L.",
       "initials": "NL",
       "photo": "img/f59542e0b3e4908f.jpg",
@@ -2577,7 +2859,7 @@
     },
     {
       "key": "93bf82ffd56aa527",
-      "rank": 19,
+      "rank": 21,
       "name": "Noelia F.",
       "initials": "NF",
       "photo": "img/93bf82ffd56aa527.jpg",
@@ -2704,7 +2986,7 @@
     },
     {
       "key": "2b1fc6ccb143ac07",
-      "rank": 20,
+      "rank": 22,
       "name": "Cristina E.",
       "initials": "CE",
       "photo": "img/2b1fc6ccb143ac07.jpg",
@@ -2828,133 +3110,8 @@
       ]
     },
     {
-      "key": "46b53b5a274ee8b9",
-      "rank": 21,
-      "name": "Cristina F.",
-      "initials": "CF",
-      "photo": "img/46b53b5a274ee8b9.jpg",
-      "points": 37,
-      "training_days": 8,
-      "classes": 8,
-      "breakdown": [
-        {
-          "key": "vuelta",
-          "label": "Vuelta",
-          "points": 0,
-          "count": 0,
-          "detail": "sin vueltas",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "racha_2s",
-          "label": "Racha 2 semanas",
-          "points": 10,
-          "count": 1,
-          "detail": "1 × 10",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-19",
-              "time": "18:00",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 10,
-              "reason": "Racha: semana 2 consecutiva (16–22 nov)"
-            }
-          ]
-        },
-        {
-          "key": "racha_mes",
-          "label": "Racha 1 mes",
-          "points": 0,
-          "count": 0,
-          "detail": "sin racha",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "rutina",
-          "label": "Rutina",
-          "points": 27,
-          "count": 5,
-          "detail": "3 × 5 (día 2) + 2 × 6 (día 3)",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-12",
-              "time": "18:00",
-              "class_name": "Fitboxing",
-              "trainer": null,
-              "points": 5,
-              "reason": "2.º día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-15",
-              "time": "12:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 6,
-              "reason": "3.er día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-19",
-              "time": "18:00",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 5,
-              "reason": "2.º día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-24",
-              "time": "18:00",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 5,
-              "reason": "2.º día de la semana 23–29 nov"
-            },
-            {
-              "date": "2026-11-25",
-              "time": "17:30",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 6,
-              "reason": "3.er día de la semana 23–29 nov"
-            }
-          ]
-        },
-        {
-          "key": "doblete",
-          "label": "Doblete",
-          "points": 0,
-          "count": 0,
-          "detail": "sin dobletes",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "invitacion_reserva",
-          "label": "I ❤️ BF reservas",
-          "points": 0,
-          "count": 0,
-          "detail": "sin reservas de invitados",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "invitacion_conversion",
-          "label": "I ❤️ BF conversiones",
-          "points": 0,
-          "count": 0,
-          "detail": "sin conversiones de invitados",
-          "pending": false,
-          "events": []
-        }
-      ]
-    },
-    {
       "key": "dd0f9c43f8625fc8",
-      "rank": 22,
+      "rank": 23,
       "name": "Javier L.",
       "initials": "JL",
       "photo": null,
@@ -3043,131 +3200,6 @@
               "time": "19:30",
               "class_name": "Fitboxing",
               "trainer": "Rebeca K.",
-              "points": 5,
-              "reason": "2.º día de la semana 23–29 nov"
-            }
-          ]
-        },
-        {
-          "key": "doblete",
-          "label": "Doblete",
-          "points": 0,
-          "count": 0,
-          "detail": "sin dobletes",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "invitacion_reserva",
-          "label": "I ❤️ BF reservas",
-          "points": 0,
-          "count": 0,
-          "detail": "sin reservas de invitados",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "invitacion_conversion",
-          "label": "I ❤️ BF conversiones",
-          "points": 0,
-          "count": 0,
-          "detail": "sin conversiones de invitados",
-          "pending": false,
-          "events": []
-        }
-      ]
-    },
-    {
-      "key": "f1c3e451c0790d49",
-      "rank": 23,
-      "name": "Rebeca G.",
-      "initials": "RG",
-      "photo": "img/f1c3e451c0790d49.jpg",
-      "points": 37,
-      "training_days": 8,
-      "classes": 8,
-      "breakdown": [
-        {
-          "key": "vuelta",
-          "label": "Vuelta",
-          "points": 0,
-          "count": 0,
-          "detail": "sin vueltas",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "racha_2s",
-          "label": "Racha 2 semanas",
-          "points": 10,
-          "count": 1,
-          "detail": "1 × 10",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-18",
-              "time": "20:30",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 10,
-              "reason": "Racha: semana 2 consecutiva (16–22 nov)"
-            }
-          ]
-        },
-        {
-          "key": "racha_mes",
-          "label": "Racha 1 mes",
-          "points": 0,
-          "count": 0,
-          "detail": "sin racha",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "rutina",
-          "label": "Rutina",
-          "points": 27,
-          "count": 5,
-          "detail": "3 × 5 (día 2) + 2 × 6 (día 3)",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-12",
-              "time": "09:30",
-              "class_name": "Fitboxing",
-              "trainer": "Paola C.",
-              "points": 5,
-              "reason": "2.º día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-14",
-              "time": "11:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 6,
-              "reason": "3.er día de la semana 9–15 nov"
-            },
-            {
-              "date": "2026-11-18",
-              "time": "20:30",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 5,
-              "reason": "2.º día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-21",
-              "time": "10:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 6,
-              "reason": "3.er día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-25",
-              "time": "20:30",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
               "points": 5,
               "reason": "2.º día de la semana 23–29 nov"
             }
@@ -4328,8 +4360,109 @@
       ]
     },
     {
-      "key": "e384873fea0a3998",
+      "key": "e88411d53906f807",
       "rank": 34,
+      "name": "Maia S.",
+      "initials": "MS",
+      "photo": "img/e88411d53906f807.jpg",
+      "points": 31,
+      "training_days": 3,
+      "classes": 3,
+      "breakdown": [
+        {
+          "key": "vuelta",
+          "label": "Vuelta",
+          "points": 20,
+          "count": 1,
+          "detail": "1 × 20 (30 días)",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-23",
+              "time": "20:30",
+              "class_name": "Fitboxing",
+              "trainer": "Rebeca K.",
+              "points": 20,
+              "reason": "Vuelta tras 35 días (1 mes)"
+            }
+          ]
+        },
+        {
+          "key": "racha_2s",
+          "label": "Racha 2 semanas",
+          "points": 0,
+          "count": 0,
+          "detail": "sin racha",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "racha_mes",
+          "label": "Racha 1 mes",
+          "points": 0,
+          "count": 0,
+          "detail": "sin racha",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "rutina",
+          "label": "Rutina",
+          "points": 11,
+          "count": 2,
+          "detail": "1 × 5 (día 2) + 1 × 6 (día 3)",
+          "pending": false,
+          "events": [
+            {
+              "date": "2026-11-26",
+              "time": "20:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 5,
+              "reason": "2.º día de la semana 23–29 nov"
+            },
+            {
+              "date": "2026-11-28",
+              "time": "11:00",
+              "class_name": "Fitboxing",
+              "trainer": "Alicia G.",
+              "points": 6,
+              "reason": "3.er día de la semana 23–29 nov"
+            }
+          ]
+        },
+        {
+          "key": "doblete",
+          "label": "Doblete",
+          "points": 0,
+          "count": 0,
+          "detail": "sin dobletes",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_reserva",
+          "label": "I ❤️ BF reservas",
+          "points": 0,
+          "count": 0,
+          "detail": "sin reservas de invitados",
+          "pending": false,
+          "events": []
+        },
+        {
+          "key": "invitacion_conversion",
+          "label": "I ❤️ BF conversiones",
+          "points": 0,
+          "count": 0,
+          "detail": "sin conversiones de invitados",
+          "pending": false,
+          "events": []
+        }
+      ]
+    },
+    {
+      "key": "e384873fea0a3998",
+      "rank": 35,
       "name": "Noëlle D.",
       "initials": "ND",
       "photo": null,
@@ -4421,7 +4554,7 @@
     },
     {
       "key": "4fa34049e8ed4806",
-      "rank": 35,
+      "rank": 36,
       "name": "Elena N.",
       "initials": "EN",
       "photo": "img/4fa34049e8ed4806.jpg",
@@ -4530,7 +4663,7 @@
     },
     {
       "key": "8da23d9070fb6f3c",
-      "rank": 36,
+      "rank": 37,
       "name": "ISABEL I.",
       "initials": "II",
       "photo": "img/8da23d9070fb6f3c.jpg",
@@ -4639,7 +4772,7 @@
     },
     {
       "key": "1f43af3ea373d3f4",
-      "rank": 37,
+      "rank": 38,
       "name": "Patricia Gó.",
       "initials": "PG",
       "photo": null,
@@ -4748,7 +4881,7 @@
     },
     {
       "key": "b20d5e806c264e32",
-      "rank": 38,
+      "rank": 39,
       "name": "lucia R.",
       "initials": "LR",
       "photo": "img/b20d5e806c264e32.jpg",
@@ -4857,7 +4990,7 @@
     },
     {
       "key": "1818b146d6fca6ea",
-      "rank": 39,
+      "rank": 40,
       "name": "Susana F.",
       "initials": "SF",
       "photo": "img/1818b146d6fca6ea.jpg",
@@ -4932,115 +5065,6 @@
               "trainer": "Rebeca K.",
               "points": 5,
               "reason": "2.º día de la semana 16–22 nov"
-            }
-          ]
-        },
-        {
-          "key": "doblete",
-          "label": "Doblete",
-          "points": 0,
-          "count": 0,
-          "detail": "sin dobletes",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "invitacion_reserva",
-          "label": "I ❤️ BF reservas",
-          "points": 0,
-          "count": 0,
-          "detail": "sin reservas de invitados",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "invitacion_conversion",
-          "label": "I ❤️ BF conversiones",
-          "points": 0,
-          "count": 0,
-          "detail": "sin conversiones de invitados",
-          "pending": false,
-          "events": []
-        }
-      ]
-    },
-    {
-      "key": "983a09faad625ada",
-      "rank": 40,
-      "name": "Yolanda D.",
-      "initials": "YD",
-      "photo": "img/983a09faad625ada.jpg",
-      "points": 26,
-      "training_days": 5,
-      "classes": 5,
-      "breakdown": [
-        {
-          "key": "vuelta",
-          "label": "Vuelta",
-          "points": 0,
-          "count": 0,
-          "detail": "sin vueltas",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "racha_2s",
-          "label": "Racha 2 semanas",
-          "points": 10,
-          "count": 1,
-          "detail": "1 × 10",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-26",
-              "time": "09:30",
-              "class_name": "Fitboxing",
-              "trainer": "Paola C.",
-              "points": 10,
-              "reason": "Racha: semana 2 consecutiva (23–29 nov)"
-            }
-          ]
-        },
-        {
-          "key": "racha_mes",
-          "label": "Racha 1 mes",
-          "points": 0,
-          "count": 0,
-          "detail": "sin racha",
-          "pending": false,
-          "events": []
-        },
-        {
-          "key": "rutina",
-          "label": "Rutina",
-          "points": 16,
-          "count": 3,
-          "detail": "2 × 5 (día 2) + 1 × 6 (día 3)",
-          "pending": false,
-          "events": [
-            {
-              "date": "2026-11-17",
-              "time": "18:00",
-              "class_name": "Fitboxing",
-              "trainer": "Rebeca K.",
-              "points": 5,
-              "reason": "2.º día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-19",
-              "time": "20:00",
-              "class_name": "Fitboxing",
-              "trainer": "Alicia G.",
-              "points": 6,
-              "reason": "3.er día de la semana 16–22 nov"
-            },
-            {
-              "date": "2026-11-26",
-              "time": "09:30",
-              "class_name": "Fitboxing",
-              "trainer": "Paola C.",
-              "points": 5,
-              "reason": "2.º día de la semana 23–29 nov"
             }
           ]
         },
